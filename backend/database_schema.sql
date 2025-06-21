@@ -1,225 +1,356 @@
 -- Database Schema for Chore Economy App
 -- Compatible with Supabase (PostgreSQL)
 
--- Enable UUID extension
+-- Enable required extensions
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Users table for authentication and user management
-CREATE TABLE users (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    wallet_balance DECIMAL(10,2) DEFAULT 0.00,
+-- User profiles table (extends auth.users)
+-- This table stores additional user information beyond what's in auth.users
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    first_name TEXT,
+    last_name TEXT,
+    avatar_url TEXT,
+    wallet_balance DECIMAL(10,2) DEFAULT 0.00 CHECK (wallet_balance >= 0),
     is_demo_account BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Groups table for household/group management
-CREATE TABLE groups (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name VARCHAR(100) NOT NULL,
+CREATE TABLE public.groups (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    name TEXT NOT NULL CHECK (length(name) > 0),
     description TEXT,
-    invitation_code VARCHAR(20) UNIQUE NOT NULL,
-    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    invitation_code TEXT UNIQUE NOT NULL CHECK (length(invitation_code) >= 6),
+    created_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Group members junction table
-CREATE TABLE group_members (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    role VARCHAR(20) DEFAULT 'member' CHECK (role IN ('admin', 'member')),
-    joined_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+-- Group membership junction table
+CREATE TABLE public.group_members (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    role TEXT DEFAULT 'member' CHECK (role IN ('admin', 'member')),
+    joined_at TIMESTAMPTZ DEFAULT NOW(),
+    
     UNIQUE(group_id, user_id)
 );
 
--- Money pools for groups
-CREATE TABLE money_pools (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    name VARCHAR(100) NOT NULL,
-    total_amount DECIMAL(10,2) NOT NULL,
-    remaining_amount DECIMAL(10,2) NOT NULL,
+-- Money pools for shared funding
+CREATE TABLE public.money_pools (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+    name TEXT NOT NULL CHECK (length(name) > 0),
+    total_amount DECIMAL(10,2) NOT NULL CHECK (total_amount >= 0),
+    remaining_amount DECIMAL(10,2) NOT NULL CHECK (remaining_amount >= 0),
     is_active BOOLEAN DEFAULT TRUE,
-    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    created_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    
+    CHECK (remaining_amount <= total_amount)
 );
 
--- Tasks table
-CREATE TABLE tasks (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    group_id UUID NOT NULL REFERENCES groups(id) ON DELETE CASCADE,
-    created_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    title VARCHAR(200) NOT NULL,
-    description TEXT NOT NULL,
-    success_criteria TEXT NOT NULL,
-    reward_amount DECIMAL(10,2) NOT NULL,
-    status VARCHAR(20) DEFAULT 'available' CHECK (status IN ('available', 'assigned', 'submitted', 'completed', 'rejected')),
-    assigned_to UUID REFERENCES users(id) ON DELETE SET NULL,
-    assigned_at TIMESTAMP WITH TIME ZONE,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+-- Tasks/chores table
+CREATE TABLE public.tasks (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    group_id UUID NOT NULL REFERENCES public.groups(id) ON DELETE CASCADE,
+    created_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    assigned_to UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
+    title TEXT NOT NULL CHECK (length(title) > 0),
+    description TEXT NOT NULL CHECK (length(description) > 0),
+    success_criteria TEXT NOT NULL CHECK (length(success_criteria) > 0),
+    reward_amount DECIMAL(10,2) NOT NULL CHECK (reward_amount > 0),
+    status TEXT DEFAULT 'available' CHECK (status IN ('available', 'assigned', 'submitted', 'completed', 'rejected')),
+    assigned_at TIMESTAMPTZ,
+    due_date TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Task submissions for photo evidence
-CREATE TABLE task_submissions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-    submitted_by UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    photo_url VARCHAR(500) NOT NULL,
+-- Task submission evidence (photos, notes)
+CREATE TABLE public.task_submissions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
+    submitted_by UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    photo_urls TEXT[] DEFAULT '{}', -- Array of photo URLs for flexibility
     notes TEXT,
-    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    submitted_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Voting system for task approval
-CREATE TABLE task_votes (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    task_id UUID NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
-    voter_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    vote VARCHAR(10) NOT NULL CHECK (vote IN ('approve', 'reject')),
+-- Task approval voting system
+CREATE TABLE public.task_votes (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    task_id UUID NOT NULL REFERENCES public.tasks(id) ON DELETE CASCADE,
+    voter_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    vote TEXT NOT NULL CHECK (vote IN ('approve', 'reject')),
     comment TEXT,
-    voted_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+    voted_at TIMESTAMPTZ DEFAULT NOW(),
+    
     UNIQUE(task_id, voter_id)
 );
 
--- Transaction history for payments
-CREATE TABLE transactions (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-    task_id UUID REFERENCES tasks(id) ON DELETE SET NULL,
-    money_pool_id UUID REFERENCES money_pools(id) ON DELETE SET NULL,
-    transaction_type VARCHAR(20) NOT NULL CHECK (transaction_type IN ('earned', 'deposited', 'withdrawn')),
-    amount DECIMAL(10,2) NOT NULL,
+-- Financial transaction history
+CREATE TABLE public.transactions (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+    task_id UUID REFERENCES public.tasks(id) ON DELETE SET NULL,
+    money_pool_id UUID REFERENCES public.money_pools(id) ON DELETE SET NULL,
+    transaction_type TEXT NOT NULL CHECK (transaction_type IN ('earned', 'deposited', 'withdrawn', 'refunded')),
+    amount DECIMAL(10,2) NOT NULL CHECK (amount != 0),
     description TEXT,
-    stripe_payment_intent_id VARCHAR(100),
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+    stripe_payment_intent_id TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Indexes for performance
-CREATE INDEX idx_users_email ON users(email);
-CREATE INDEX idx_groups_invitation_code ON groups(invitation_code);
-CREATE INDEX idx_group_members_group_id ON group_members(group_id);
-CREATE INDEX idx_group_members_user_id ON group_members(user_id);
-CREATE INDEX idx_tasks_group_id ON tasks(group_id);
-CREATE INDEX idx_tasks_status ON tasks(status);
-CREATE INDEX idx_tasks_assigned_to ON tasks(assigned_to);
-CREATE INDEX idx_task_votes_task_id ON task_votes(task_id);
-CREATE INDEX idx_transactions_user_id ON transactions(user_id);
-CREATE INDEX idx_money_pools_group_id ON money_pools(group_id);
+-- Performance indexes
+CREATE INDEX idx_profiles_created_at ON public.profiles(created_at);
+CREATE INDEX idx_groups_invitation_code ON public.groups(invitation_code);
+CREATE INDEX idx_groups_created_by ON public.groups(created_by);
+CREATE INDEX idx_group_members_group_id ON public.group_members(group_id);
+CREATE INDEX idx_group_members_user_id ON public.group_members(user_id);
+CREATE INDEX idx_money_pools_group_id ON public.money_pools(group_id);
+CREATE INDEX idx_money_pools_active ON public.money_pools(is_active) WHERE is_active = TRUE;
+CREATE INDEX idx_tasks_group_id ON public.tasks(group_id);
+CREATE INDEX idx_tasks_status ON public.tasks(status);
+CREATE INDEX idx_tasks_assigned_to ON public.tasks(assigned_to);
+CREATE INDEX idx_tasks_due_date ON public.tasks(due_date) WHERE due_date IS NOT NULL;
+CREATE INDEX idx_task_submissions_task_id ON public.task_submissions(task_id);
+CREATE INDEX idx_task_votes_task_id ON public.task_votes(task_id);
+CREATE INDEX idx_transactions_user_id ON public.transactions(user_id);
+CREATE INDEX idx_transactions_type ON public.transactions(transaction_type);
+CREATE INDEX idx_transactions_created_at ON public.transactions(created_at);
 
--- Functions for automatic updated_at timestamps
-CREATE OR REPLACE FUNCTION update_updated_at_column()
+-- Updated timestamp trigger function
+CREATE OR REPLACE FUNCTION public.handle_updated_at()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.updated_at = CURRENT_TIMESTAMP;
+    NEW.updated_at = NOW();
     RETURN NEW;
-END;
-$$ language 'plpgsql';
-
--- Triggers for updated_at
-CREATE TRIGGER update_users_updated_at BEFORE UPDATE ON users
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_groups_updated_at BEFORE UPDATE ON groups
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_money_pools_updated_at BEFORE UPDATE ON money_pools
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER update_tasks_updated_at BEFORE UPDATE ON tasks
-    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-
--- Row Level Security (RLS) policies for Supabase
-ALTER TABLE users ENABLE ROW LEVEL SECURITY;
-ALTER TABLE groups ENABLE ROW LEVEL SECURITY;
-ALTER TABLE group_members ENABLE ROW LEVEL SECURITY;
-ALTER TABLE money_pools ENABLE ROW LEVEL SECURITY;
-ALTER TABLE tasks ENABLE ROW LEVEL SECURITY;
-ALTER TABLE task_submissions ENABLE ROW LEVEL SECURITY;
-ALTER TABLE task_votes ENABLE ROW LEVEL SECURITY;
-ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-
--- Basic RLS policies (you may need to customize these based on your auth setup)
-CREATE POLICY "Users can view their own profile" ON users
-    FOR SELECT USING (auth.uid() = id);
-
-CREATE POLICY "Users can update their own profile" ON users
-    FOR UPDATE USING (auth.uid() = id);
-
-CREATE POLICY "Group members can view group details" ON groups
-    FOR SELECT USING (
-        id IN (
-            SELECT group_id FROM group_members 
-            WHERE user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can view groups they belong to" ON group_members
-    FOR SELECT USING (
-        user_id = auth.uid() OR 
-        group_id IN (
-            SELECT group_id FROM group_members 
-            WHERE user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Group members can view tasks in their groups" ON tasks
-    FOR SELECT USING (
-        group_id IN (
-            SELECT group_id FROM group_members 
-            WHERE user_id = auth.uid()
-        )
-    );
-
-CREATE POLICY "Users can view their own transactions" ON transactions
-    FOR SELECT USING (user_id = auth.uid());
-
--- Insert demo data function
-CREATE OR REPLACE FUNCTION insert_demo_data()
-RETURNS void AS $$
-BEGIN
-    -- Create demo users
-    INSERT INTO users (id, email, password_hash, first_name, last_name, is_demo_account, wallet_balance) VALUES
-    ('550e8400-e29b-41d4-a716-446655440001', 'demo1@example.com', '$2b$12$demo_hash_1', 'Alice', 'Johnson', true, 25.50),
-    ('550e8400-e29b-41d4-a716-446655440002', 'demo2@example.com', '$2b$12$demo_hash_2', 'Bob', 'Smith', true, 15.25),
-    ('550e8400-e29b-41d4-a716-446655440003', 'demo3@example.com', '$2b$12$demo_hash_3', 'Carol', 'Davis', true, 32.75),
-    ('550e8400-e29b-41d4-a716-446655440004', 'demo4@example.com', '$2b$12$demo_hash_4', 'David', 'Wilson', true, 8.00),
-    ('550e8400-e29b-41d4-a716-446655440005', 'demo5@example.com', '$2b$12$demo_hash_5', 'Emma', 'Brown', true, 41.20);
-    
-    -- Create demo group
-    INSERT INTO groups (id, name, description, invitation_code, created_by) VALUES
-    ('650e8400-e29b-41d4-a716-446655440001', 'Demo House', 'A sample household for testing the app', 'DEMO123', '550e8400-e29b-41d4-a716-446655440001');
-    
-    -- Add all demo users to the demo group
-    INSERT INTO group_members (group_id, user_id, role) VALUES
-    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'admin'),
-    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002', 'member'),
-    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440003', 'member'),
-    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440004', 'member'),
-    ('650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440005', 'member');
-    
-    -- Create demo money pool
-    INSERT INTO money_pools (id, group_id, name, total_amount, remaining_amount, created_by) VALUES
-    ('750e8400-e29b-41d4-a716-446655440001', '650e8400-e29b-41d4-a716-446655440001', 'January Chore Fund', 200.00, 150.75, '550e8400-e29b-41d4-a716-446655440001');
-    
-    -- Create demo tasks
-    INSERT INTO tasks (id, group_id, created_by, title, description, success_criteria, reward_amount, status) VALUES
-    ('850e8400-e29b-41d4-a716-446655440001', '650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440001', 'Clean Kitchen', 'Deep clean the kitchen including counters, sink, and appliances', 'All surfaces wiped down, dishes done, floor swept and mopped', 15.00, 'available'),
-    ('850e8400-e29b-41d4-a716-446655440002', '650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002', 'Vacuum Living Room', 'Vacuum the entire living room carpet', 'All visible dirt and debris removed from carpet', 10.00, 'assigned'),
-    ('850e8400-e29b-41d4-a716-446655440003', '650e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440003', 'Take Out Trash', 'Empty all trash bins and take to curb', 'All trash bins emptied and bags placed at curb for pickup', 5.00, 'completed');
-    
-    -- Assign one task
-    UPDATE tasks SET assigned_to = '550e8400-e29b-41d4-a716-446655440003', assigned_at = CURRENT_TIMESTAMP 
-    WHERE id = '850e8400-e29b-41d4-a716-446655440002';
-    
 END;
 $$ LANGUAGE plpgsql;
 
--- Call the demo data function (uncomment when ready to populate demo data)
--- SELECT insert_demo_data(); 
+-- Apply updated_at triggers
+CREATE TRIGGER set_updated_at_profiles BEFORE UPDATE ON public.profiles
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+CREATE TRIGGER set_updated_at_groups BEFORE UPDATE ON public.groups
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+CREATE TRIGGER set_updated_at_money_pools BEFORE UPDATE ON public.money_pools
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+CREATE TRIGGER set_updated_at_tasks BEFORE UPDATE ON public.tasks
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
+-- Auto-create profile when user signs up
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+    INSERT INTO public.profiles (id, first_name, last_name)
+    VALUES (NEW.id, '', '');
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+CREATE TRIGGER on_auth_user_created
+    AFTER INSERT ON auth.users
+    FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- Row Level Security (RLS)
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.groups ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.group_members ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.money_pools ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.tasks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_submissions ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.task_votes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.transactions ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for profiles
+CREATE POLICY "Users can view their own profile" ON public.profiles
+    FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update their own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Users can view profiles in their groups" ON public.profiles
+    FOR SELECT USING (
+        id IN (
+            SELECT user_id FROM public.group_members 
+            WHERE group_id IN (
+                SELECT group_id FROM public.group_members 
+                WHERE user_id = auth.uid()
+            )
+        )
+    );
+
+-- RLS Policies for groups
+CREATE POLICY "Group members can view their groups" ON public.groups
+    FOR SELECT USING (
+        id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Users can create groups" ON public.groups
+    FOR INSERT WITH CHECK (auth.uid() = created_by);
+
+CREATE POLICY "Group admins can update groups" ON public.groups
+    FOR UPDATE USING (
+        id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- RLS Policies for group_members
+CREATE POLICY "Users can view group memberships" ON public.group_members
+    FOR SELECT USING (
+        user_id = auth.uid() OR 
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Group admins can manage members" ON public.group_members
+    FOR ALL USING (
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- RLS Policies for money_pools
+CREATE POLICY "Group members can view money pools" ON public.money_pools
+    FOR SELECT USING (
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Group admins can manage money pools" ON public.money_pools
+    FOR ALL USING (
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- RLS Policies for tasks
+CREATE POLICY "Group members can view tasks" ON public.tasks
+    FOR SELECT USING (
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Group members can create tasks" ON public.tasks
+    FOR INSERT WITH CHECK (
+        auth.uid() = created_by AND
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid()
+        )
+    );
+
+CREATE POLICY "Task creators and assignees can update tasks" ON public.tasks
+    FOR UPDATE USING (
+        created_by = auth.uid() OR 
+        assigned_to = auth.uid() OR
+        group_id IN (
+            SELECT group_id FROM public.group_members 
+            WHERE user_id = auth.uid() AND role = 'admin'
+        )
+    );
+
+-- RLS Policies for task_submissions
+CREATE POLICY "Users can view submissions for their group tasks" ON public.task_submissions
+    FOR SELECT USING (
+        task_id IN (
+            SELECT id FROM public.tasks
+            WHERE group_id IN (
+                SELECT group_id FROM public.group_members 
+                WHERE user_id = auth.uid()
+            )
+        )
+    );
+
+CREATE POLICY "Task assignees can create submissions" ON public.task_submissions
+    FOR INSERT WITH CHECK (
+        auth.uid() = submitted_by AND
+        task_id IN (
+            SELECT id FROM public.tasks 
+            WHERE assigned_to = auth.uid()
+        )
+    );
+
+-- RLS Policies for task_votes
+CREATE POLICY "Group members can view votes" ON public.task_votes
+    FOR SELECT USING (
+        task_id IN (
+            SELECT id FROM public.tasks
+            WHERE group_id IN (
+                SELECT group_id FROM public.group_members 
+                WHERE user_id = auth.uid()
+            )
+        )
+    );
+
+CREATE POLICY "Group members can vote on tasks" ON public.task_votes
+    FOR INSERT WITH CHECK (
+        auth.uid() = voter_id AND
+        task_id IN (
+            SELECT id FROM public.tasks
+            WHERE group_id IN (
+                SELECT group_id FROM public.group_members 
+                WHERE user_id = auth.uid()
+            )
+        )
+    );
+
+-- RLS Policies for transactions
+CREATE POLICY "Users can view their own transactions" ON public.transactions
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "System can create transactions" ON public.transactions
+    FOR INSERT WITH CHECK (user_id = auth.uid());
+
+-- Helper views for common queries
+CREATE VIEW public.user_group_memberships AS
+SELECT 
+    gm.*,
+    g.name as group_name,
+    g.invitation_code,
+    p.first_name,
+    p.last_name
+FROM public.group_members gm
+JOIN public.groups g ON gm.group_id = g.id
+JOIN public.profiles p ON gm.user_id = p.id;
+
+CREATE VIEW public.task_details AS
+SELECT 
+    t.*,
+    g.name as group_name,
+    creator.first_name || ' ' || creator.last_name as created_by_name,
+    assignee.first_name || ' ' || assignee.last_name as assigned_to_name
+FROM public.tasks t
+JOIN public.groups g ON t.group_id = g.id
+JOIN public.profiles creator ON t.created_by = creator.id
+LEFT JOIN public.profiles assignee ON t.assigned_to = assignee.id;
+
+-- Grant appropriate permissions
+GRANT USAGE ON SCHEMA public TO anon, authenticated;
+GRANT ALL ON ALL TABLES IN SCHEMA public TO authenticated;
+GRANT ALL ON ALL SEQUENCES IN SCHEMA public TO authenticated;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA public TO authenticated;
+
+-- Note: To populate with demo data, create users through Supabase Auth first,
+-- then manually insert profile data referencing those auth user IDs 
