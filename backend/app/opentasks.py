@@ -46,6 +46,7 @@ def complete_task(tid: str) -> None:
     :param tid: the id of the task the user has completed and wants to be reviewed.
     :return: None.
     """
+    uid = supabase_cl.auth.get_user().user.id  # Gets the id of the user from the authorized user table
     supabase_cl.table("tasks").delete().eq("id", tid).execute()  # DELETES THE ROW FROM THE OPEN TASKS
     supabase_cl.table("task_submissions").insert({"task_id": tid, "submitted_by": uid}).execute()
     # ADDS TASK TO REVIEW TABLE
