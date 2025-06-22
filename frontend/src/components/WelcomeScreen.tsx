@@ -28,7 +28,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cream-50 via-pink-50 to-sage-100">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-card/95 backdrop-blur-sm border-2 border-sage-200 shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">

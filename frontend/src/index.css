@@ -9,10 +9,10 @@
     --background: 255 244 230; /* cream-50 */
     --foreground: 46 87 68; /* sage-600 */
 
-    --card: 253 247 244; /* pink-50 */
+    --card: 255 244 230; /* cream-50 - warmer card background */
     --card-foreground: 46 87 68; /* sage-600 */
 
-    --popover: 253 247 244; /* pink-50 */
+    --popover: 255 244 230; /* cream-50 */
     --popover-foreground: 46 87 68; /* sage-600 */
 
     --primary: 60 110 87; /* sage-500 */
