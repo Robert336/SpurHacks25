@@ -29,7 +29,6 @@ def login(email: str, password: str) -> Optional[gotrue.AuthResponse]:
         user = supabase_cl.auth.sign_in_with_password({"email": email, "password": password})
         if user and user.user:
             uid = user.user.id
-        print(f"uid was set successfully, uid = {uid}")
         print(uid)
         return user
     except AuthApiError:
@@ -58,7 +57,6 @@ def signup(email: str, password: str) -> Optional[gotrue.AuthResponse]:
         user = supabase_cl.auth.sign_up({"email": email, "password": password})
         if user and user.user:
             uid = user.user.id
-        print(f"uid was set successfully, uid = {uid}")
         return user
     except AuthApiError:
         return None

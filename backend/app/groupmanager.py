@@ -13,7 +13,7 @@ key: str = os.getenv("SUPABASE_KEY")
 uid = None
 
 
-def start_group(name: str, description: str, invitation_code: str) -> None:
+def create_group(name: str, description: str, invitation_code: str) -> None:
     """
     Creates a new invite-only group, with the current user as admin.
     :param name: the group's name.
@@ -23,7 +23,6 @@ def start_group(name: str, description: str, invitation_code: str) -> None:
     """
     global uid
     uid = ac.get_uid()
-    print(f"according to groupmanager, uid = {uid}")
     entry = {"name": name, "description": description, "invitation_code": invitation_code, "created_by": ac.uid}
 
     ac.supabase_cl.table("groups").insert(entry).execute()  # Inserts new group into table
@@ -31,10 +30,9 @@ def start_group(name: str, description: str, invitation_code: str) -> None:
 
     entry = {"group_id": gid, "user_id": uid, "role": "admin"}
     ac.supabase_cl.table("group_members").insert(entry).execute()
-    print("group successfully created")
 
 
-def add_to_group(email: str) -> None:
+def add_roommate(email: str) -> None:
     """
     Adds a roommate to the group.
     :param email: the roommate's email.
@@ -46,3 +44,13 @@ def add_to_group(email: str) -> None:
 
     entry = {"group_id": gid, "user_id": new_uid}
     ac.supabase_cl.table("group_members").insert(entry).execute()
+
+
+def kick_roommate(email: str) -> None:
+    """
+    Kicks a roommate out of the QuestFlat group.
+    :param email: the email of the member-to-be-kicked.
+    :return: None
+    """
+    kickee_id = ac.supabase_cl.from_("users").select("id").eq("email", email).execute()
+    ac.supabase_cl.table("group_members").delete("group_id").eq("user_id", kickee_id).execute()
