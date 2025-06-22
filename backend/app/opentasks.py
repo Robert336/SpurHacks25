@@ -38,7 +38,7 @@ def take_task(tid: str) -> None:
                                        "status": "assigned"}).eq("id", tid).execute()  # updates the table with new info
 
 
-def complete_task(tid: str, ) -> None:
+def complete_task(tid: str) -> None:
     """
     A function for the current user to indicate task completion.
     :param tid: the id of the task the user has completed and wants to be reviewed.
