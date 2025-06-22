@@ -16,10 +16,10 @@ const FAQItem = ({
   };
   
   return (
-    <Card variant="faq" padding="lg" className={className} {...props}>
+    <Card onClick={handleClick} variant="faq" padding="lg" className={className} {...props}>
       <button 
         className="w-full text-left flex justify-between items-center"
-        onClick={handleClick}
+        
       >
         <h4 className="text-xl font-bold text-[#3C6E57] pr-4">
           {question}
