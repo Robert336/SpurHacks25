@@ -11,7 +11,7 @@ load_dotenv(dotenv_path)
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")
 
-supabase: Client = create_client(url, key)
+supabase_cl: Client = create_client(url, key)
 
 
 def login(email: str, password: str) -> Optional[gotrue.AuthResponse]:
@@ -22,7 +22,7 @@ def login(email: str, password: str) -> Optional[gotrue.AuthResponse]:
     :return: user on successful login, None on bad credentials
     """
     try:
-        user = supabase.auth.sign_in_with_password({"email": email, "password": password})
+        user = supabase_cl.auth.sign_in_with_password({"email": email, "password": password})
         return user
     except AuthApiError:
         return None
@@ -33,7 +33,7 @@ def logout():
     A function to log a user out of QuestFlat
     :return:
     """
-    supabase.auth.sign_out()
+    supabase_cl.auth.sign_out()
 
 
 def signup(email: str, password: str) -> Optional[gotrue.AuthResponse]:
@@ -44,7 +44,7 @@ def signup(email: str, password: str) -> Optional[gotrue.AuthResponse]:
     :return: user on success, None on already-existing-account
     """
     try:
-        user = supabase.auth.sign_up({"email": email, "password": password})
+        user = supabase_cl.auth.sign_up({"email": email, "password": password})
         return user
     except AuthApiError:
         return None
