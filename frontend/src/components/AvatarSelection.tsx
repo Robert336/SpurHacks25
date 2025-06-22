@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -32,28 +31,28 @@ const avatars: Avatar[] = [
     name: 'Laundry Mage',
     description: 'Weaver of fresh-scented fabric spells',
     emoji: '👕✨',
-    color: 'bg-cream-100'
+    color: 'bg-pink-200'
   },
   {
     id: 'vacuum-ranger',
     name: 'Vacuum Ranger',
     description: 'Silent guardian of carpet cleanliness',
     emoji: '🏹🧽',
-    color: 'bg-sage-100'
+    color: 'bg-lavender-100'
   },
   {
     id: 'bathroom-paladin',
     name: 'Bathroom Paladin',
     description: 'Holy warrior against grime and chaos',
     emoji: '🛁⚡',
-    color: 'bg-terracotta-100'
+    color: 'bg-gold-100'
   },
   {
     id: 'garden-druid',
     name: 'Garden Druid',
     description: 'Nature whisperer and plant caretaker',
     emoji: '🌱🍃',
-    color: 'bg-cream-100'
+    color: 'bg-cream-200'
   }
 ];
 
@@ -72,8 +71,8 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelectAvatar, playe
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <Card className="w-full max-w-4xl bg-card/90 backdrop-blur-sm border-2 border-sage-200 shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cream-50 via-pink-50 to-sage-100">
+      <Card className="w-full max-w-4xl bg-card/95 backdrop-blur-sm border-2 border-sage-200 shadow-2xl">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-fredoka font-bold text-sage-800 mb-2">
             Choose Your Quest Class
@@ -87,7 +86,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelectAvatar, playe
             {avatars.map((avatar) => (
               <div
                 key={avatar.id}
-                className={`avatar-card ${selectedAvatar?.id === avatar.id ? 'selected' : ''} ${avatar.color}`}
+                className={`avatar-card ${selectedAvatar?.id === avatar.id ? 'selected' : ''} ${avatar.color} hover:scale-105 transition-transform`}
                 onClick={() => setSelectedAvatar(avatar)}
               >
                 <div className="text-center">
@@ -99,7 +98,7 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelectAvatar, playe
                     {avatar.description}
                   </p>
                   {selectedAvatar?.id === avatar.id && (
-                    <CheckCircle className="w-6 h-6 text-sage-600 mx-auto mt-3" />
+                    <CheckCircle className="w-6 h-6 text-sage-500 mx-auto mt-3" />
                   )}
                 </div>
               </div>
@@ -117,8 +116,8 @@ const AvatarSelection: React.FC<AvatarSelectionProps> = ({ onSelectAvatar, playe
             </Button>
           </div>
           
-          <div className="mt-6 p-4 bg-cream-50 border border-cream-200 rounded-lg">
-            <div className="flex items-center justify-center space-x-2 text-cream-800">
+          <div className="mt-6 p-4 cozy-accent rounded-lg">
+            <div className="flex items-center justify-center space-x-2 text-sage-700">
               <span className="text-2xl">🧚‍♀️</span>
               <p className="text-sm font-medium italic">
                 "Choose wisely, dear adventurer! Each class brings unique charm to your questing journey." - Spryte

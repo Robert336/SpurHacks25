@@ -1,89 +1,88 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* QuestFlat Custom Design System */
+/* QuestFlat Custom Design System - Cozy Cottagecore */
 
 @layer base {
   :root {
-    --background: 252 250 245;
-    --foreground: 94 79 22;
+    --background: 255 244 230; /* cream-50 */
+    --foreground: 46 87 68; /* sage-600 */
 
-    --card: 254 252 249;
-    --card-foreground: 94 79 22;
+    --card: 253 247 244; /* pink-50 */
+    --card-foreground: 46 87 68; /* sage-600 */
 
-    --popover: 254 252 249;
-    --popover-foreground: 94 79 22;
+    --popover: 253 247 244; /* pink-50 */
+    --popover-foreground: 46 87 68; /* sage-600 */
 
-    --primary: 194 165 33;
-    --primary-foreground: 254 252 249;
+    --primary: 60 110 87; /* sage-500 */
+    --primary-foreground: 255 244 230; /* cream-50 */
 
-    --secondary: 240 237 229;
-    --secondary-foreground: 113 95 22;
+    --secondary: 233 216 197; /* pink-300 */
+    --secondary-foreground: 46 87 68; /* sage-600 */
 
-    --muted: 240 237 229;
-    --muted-foreground: 139 118 23;
+    --muted: 239 240 239; /* sage-100 */
+    --muted-foreground: 60 110 87; /* sage-500 */
 
-    --accent: 243 240 227;
-    --accent-foreground: 113 95 22;
+    --accent: 255 217 114; /* gold-300 */
+    --accent-foreground: 46 87 68; /* sage-600 */
 
-    --destructive: 220 53 69;
-    --destructive-foreground: 254 252 249;
+    --destructive: 212 166 166; /* terracotta-400 */
+    --destructive-foreground: 255 244 230; /* cream-50 */
 
-    --border: 224 218 202;
-    --input: 224 218 202;
-    --ring: 194 165 33;
+    --border: 216 232 216; /* sage-200 */
+    --input: 216 232 216; /* sage-200 */
+    --ring: 60 110 87; /* sage-500 */
 
     --radius: 0.75rem;
 
-    --sidebar-background: 252 250 245;
-    --sidebar-foreground: 113 95 22;
-    --sidebar-primary: 194 165 33;
-    --sidebar-primary-foreground: 254 252 249;
-    --sidebar-accent: 240 237 229;
-    --sidebar-accent-foreground: 113 95 22;
-    --sidebar-border: 224 218 202;
-    --sidebar-ring: 194 165 33;
+    --sidebar-background: 255 244 230; /* cream-50 */
+    --sidebar-foreground: 46 87 68; /* sage-600 */
+    --sidebar-primary: 60 110 87; /* sage-500 */
+    --sidebar-primary-foreground: 255 244 230; /* cream-50 */
+    --sidebar-accent: 239 240 239; /* sage-100 */
+    --sidebar-accent-foreground: 46 87 68; /* sage-600 */
+    --sidebar-border: 216 232 216; /* sage-200 */
+    --sidebar-ring: 60 110 87; /* sage-500 */
   }
 
   .dark {
-    --background: 94 79 22;
-    --foreground: 252 250 245;
+    --background: 26 48 40; /* sage-900 */
+    --foreground: 255 244 230; /* cream-50 */
 
-    --card: 113 95 22;
-    --card-foreground: 252 250 245;
+    --card: 31 57 47; /* sage-800 */
+    --card-foreground: 255 244 230; /* cream-50 */
 
-    --popover: 113 95 22;
-    --popover-foreground: 252 250 245;
+    --popover: 31 57 47; /* sage-800 */
+    --popover-foreground: 255 244 230; /* cream-50 */
 
-    --primary: 194 165 33;
-    --primary-foreground: 94 79 22;
+    --primary: 139 184 139; /* sage-400 */
+    --primary-foreground: 26 48 40; /* sage-900 */
 
-    --secondary: 139 118 23;
-    --secondary-foreground: 240 237 229;
+    --secondary: 37 70 57; /* sage-700 */
+    --secondary-foreground: 239 240 239; /* sage-100 */
 
-    --muted: 139 118 23;
-    --muted-foreground: 224 218 202;
+    --muted: 37 70 57; /* sage-700 */
+    --muted-foreground: 181 210 181; /* sage-300 */
 
-    --accent: 168 144 28;
-    --accent-foreground: 240 237 229;
+    --accent: 154 127 245; /* lavender-500 */
+    --accent-foreground: 26 48 40; /* sage-900 */
 
-    --destructive: 185 28 28;
-    --destructive-foreground: 254 252 249;
+    --destructive: 169 114 100; /* terracotta-600 */
+    --destructive-foreground: 255 244 230; /* cream-50 */
 
-    --border: 139 118 23;
-    --input: 139 118 23;
-    --ring: 194 165 33;
+    --border: 37 70 57; /* sage-700 */
+    --input: 37 70 57; /* sage-700 */
+    --ring: 139 184 139; /* sage-400 */
 
-    --sidebar-background: 94 79 22;
-    --sidebar-foreground: 240 237 229;
-    --sidebar-primary: 194 165 33;
-    --sidebar-primary-foreground: 94 79 22;
-    --sidebar-accent: 139 118 23;
-    --sidebar-accent-foreground: 240 237 229;
-    --sidebar-border: 139 118 23;
-    --sidebar-ring: 194 165 33;
+    --sidebar-background: 26 48 40; /* sage-900 */
+    --sidebar-foreground: 239 240 239; /* sage-100 */
+    --sidebar-primary: 139 184 139; /* sage-400 */
+    --sidebar-primary-foreground: 26 48 40; /* sage-900 */
+    --sidebar-accent: 37 70 57; /* sage-700 */
+    --sidebar-accent-foreground: 239 240 239; /* sage-100 */
+    --sidebar-border: 37 70 57; /* sage-700 */
+    --sidebar-ring: 139 184 139; /* sage-400 */
   }
 }
 
@@ -93,7 +92,7 @@
   }
 
   body {
-    @apply bg-gradient-to-br from-sage-50 via-cream-50 to-terracotta-50 text-foreground min-h-screen;
+    @apply bg-gradient-to-br from-cream-50 via-pink-50 to-sage-100 text-foreground min-h-screen;
     font-family: 'Inter', sans-serif;
   }
 
@@ -104,11 +103,11 @@
 
 @layer components {
   .quest-card {
-    @apply bg-card/80 backdrop-blur-sm border-2 border-sage-200 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02];
+    @apply bg-card/90 backdrop-blur-sm border-2 border-sage-200 rounded-xl p-4 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-sage-400;
   }
 
   .xp-badge {
-    @apply bg-gradient-to-r from-sage-500 to-sage-600 text-sage-50 px-3 py-1 rounded-full text-sm font-fredoka font-semibold shadow-md;
+    @apply bg-gradient-to-r from-sage-500 to-sage-600 text-white px-3 py-1 rounded-full text-sm font-fredoka font-semibold shadow-md;
   }
 
   .avatar-card {
@@ -120,10 +119,30 @@
   }
 
   .fairy-sparkle {
-    @apply text-sage-500 animate-sparkle;
+    @apply text-lavender-500 animate-sparkle;
   }
 
   .quest-button {
     @apply bg-gradient-to-r from-sage-500 to-sage-600 hover:from-sage-600 hover:to-sage-700 text-white font-fredoka font-semibold py-3 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105;
+  }
+
+  .reward-badge {
+    @apply bg-gradient-to-r from-gold-300 to-gold-400 text-neutral-800 px-3 py-1 rounded-full text-sm font-fredoka font-semibold shadow-md;
+  }
+
+  .difficulty-easy {
+    @apply bg-sage-100 text-sage-800 border border-sage-300;
+  }
+
+  .difficulty-medium {
+    @apply bg-gold-100 text-gold-800 border border-gold-300;
+  }
+
+  .difficulty-hard {
+    @apply bg-terracotta-100 text-terracotta-800 border border-terracotta-300;
+  }
+
+  .cozy-accent {
+    @apply bg-gradient-to-r from-pink-100 to-lavender-100 border border-pink-200;
   }
 }

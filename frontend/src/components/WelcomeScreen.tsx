@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,13 +28,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-sage-50 via-cream-50 to-terracotta-50">
-      <Card className="w-full max-w-md bg-card/90 backdrop-blur-sm border-2 border-sage-200 shadow-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-cream-50 via-pink-50 to-sage-100">
+      <Card className="w-full max-w-md bg-card/95 backdrop-blur-sm border-2 border-sage-200 shadow-2xl">
         <CardHeader className="text-center">
           <div className="flex items-center justify-center mb-4">
             <div className="relative">
               <Home className="w-12 h-12 text-sage-600" />
-              <Sparkles className="w-6 h-6 text-terracotta-400 absolute -top-1 -right-1 fairy-sparkle" />
+              <Sparkles className="w-6 h-6 text-lavender-500 absolute -top-1 -right-1 fairy-sparkle" />
             </div>
           </div>
           <CardTitle className="text-3xl font-fredoka font-bold text-sage-800 mb-2">
@@ -50,9 +49,19 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="join" className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 bg-sage-100">
-              <TabsTrigger value="join" className="font-fredoka">Join Room</TabsTrigger>
-              <TabsTrigger value="create" className="font-fredoka">Create Room</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 bg-sage-100 border border-sage-200">
+              <TabsTrigger 
+                value="join" 
+                className="font-fredoka data-[state=active]:bg-sage-200 data-[state=active]:text-sage-800"
+              >
+                Join Room
+              </TabsTrigger>
+              <TabsTrigger 
+                value="create" 
+                className="font-fredoka data-[state=active]:bg-sage-200 data-[state=active]:text-sage-800"
+              >
+                Create Room
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="join" className="space-y-4">
@@ -61,13 +70,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
                   placeholder="Your name"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  className="border-2 border-sage-200 focus:border-sage-400 rounded-lg"
+                  className="border-2 border-sage-200 focus:border-sage-400 focus:ring-sage-400 rounded-lg bg-cream-50/50"
                 />
                 <Input
                   placeholder="Room invite code"
                   value={roomCode}
                   onChange={(e) => setRoomCode(e.target.value)}
-                  className="border-2 border-sage-200 focus:border-sage-400 rounded-lg"
+                  className="border-2 border-sage-200 focus:border-sage-400 focus:ring-sage-400 rounded-lg bg-cream-50/50"
                 />
                 <Button
                   onClick={handleJoinRoom}
@@ -86,13 +95,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
                   placeholder="Your name"
                   value={playerName}
                   onChange={(e) => setPlayerName(e.target.value)}
-                  className="border-2 border-sage-200 focus:border-sage-400 rounded-lg"
+                  className="border-2 border-sage-200 focus:border-sage-400 focus:ring-sage-400 rounded-lg bg-cream-50/50"
                 />
                 <Input
                   placeholder="House name (e.g., Cozy Cottage)"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
-                  className="border-2 border-sage-200 focus:border-sage-400 rounded-lg"
+                  className="border-2 border-sage-200 focus:border-sage-400 focus:ring-sage-400 rounded-lg bg-cream-50/50"
                 />
                 <Button
                   onClick={handleCreateRoom}
@@ -106,8 +115,8 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onJoinRoom, onCreateRoom 
             </TabsContent>
           </Tabs>
           
-          <div className="mt-6 p-3 bg-terracotta-50 border border-terracotta-200 rounded-lg">
-            <p className="text-sm text-terracotta-800 text-center font-medium">
+          <div className="mt-6 p-3 cozy-accent rounded-lg">
+            <p className="text-sm text-sage-700 text-center font-medium">
               💡 Complete chores, earn XP, get real rewards!
             </p>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -118,17 +117,17 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty) {
-      case 'Easy': return 'bg-sage-100 text-sage-800';
-      case 'Medium': return 'bg-gold-100 text-gold-800';
-      case 'Hard': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'Easy': return 'difficulty-easy';
+      case 'Medium': return 'difficulty-medium';
+      case 'Hard': return 'difficulty-hard';
+      default: return 'bg-neutral-100 text-neutral-800';
     }
   };
 
   const walletBalance = Math.floor(player.xp / 100) * 5; // $5 for every 100 XP
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-sage-50 via-cream-50 to-gold-50 p-4">
+    <div className="min-h-screen bg-gradient-to-br from-cream-50 via-pink-50 to-sage-100 p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="mb-6">
@@ -137,15 +136,15 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
               <h1 className="text-3xl font-fredoka font-bold text-sage-800 mb-2">
                 {roomName} Quest House
               </h1>
-              <p className="text-sage-600">Room Code: <span className="font-mono font-semibold">{roomCode}</span></p>
+              <p className="text-sage-600">Room Code: <span className="font-mono font-semibold bg-sage-100 px-2 py-1 rounded">{roomCode}</span></p>
             </div>
-            <Button onClick={onLogout} variant="outline" className="border-sage-300">
+            <Button onClick={onLogout} variant="outline" className="border-sage-300 hover:bg-sage-50">
               Leave House
             </Button>
           </div>
           
           {/* Player Stats */}
-          <Card className="bg-gradient-to-r from-sage-100 to-gold-100 border-2 border-sage-200">
+          <Card className="bg-gradient-to-r from-pink-100 to-lavender-100 border-2 border-sage-200">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -163,7 +162,7 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
                     <p className="text-xs text-sage-600 mt-1">Experience</p>
                   </div>
                   <div className="text-center">
-                    <div className="bg-gradient-to-r from-green-400 to-green-500 text-white px-3 py-1 rounded-full text-sm font-fredoka font-semibold shadow-md">
+                    <div className="reward-badge">
                       ${walletBalance}
                     </div>
                     <p className="text-xs text-sage-600 mt-1">Earnings</p>
@@ -175,10 +174,25 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
         </div>
 
         <Tabs defaultValue="quests" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 bg-sage-100">
-            <TabsTrigger value="quests" className="font-fredoka">Active Quests</TabsTrigger>
-            <TabsTrigger value="leaderboard" className="font-fredoka">Party Leaderboard</TabsTrigger>
-            <TabsTrigger value="wallet" className="font-fredoka">Quest Wallet</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-3 bg-sage-100 border border-sage-200">
+            <TabsTrigger 
+              value="quests" 
+              className="font-fredoka data-[state=active]:bg-sage-200 data-[state=active]:text-sage-800"
+            >
+              Active Quests
+            </TabsTrigger>
+            <TabsTrigger 
+              value="leaderboard" 
+              className="font-fredoka data-[state=active]:bg-sage-200 data-[state=active]:text-sage-800"
+            >
+              Party Leaderboard
+            </TabsTrigger>
+            <TabsTrigger 
+              value="wallet" 
+              className="font-fredoka data-[state=active]:bg-sage-200 data-[state=active]:text-sage-800"
+            >
+              Quest Wallet
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="quests" className="space-y-4">
@@ -195,7 +209,7 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
                     <CardTitle className="text-lg font-fredoka font-semibold text-sage-800">
                       {quest.title}
                     </CardTitle>
-                    <CardDescription className="text-sm">
+                    <CardDescription className="text-sm text-sage-600">
                       {quest.description}
                     </CardDescription>
                   </CardHeader>
@@ -210,7 +224,7 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
                     
                     {quest.completed ? (
                       <div className="flex items-center space-x-2 text-sage-600">
-                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <CheckCircle className="w-5 h-5 text-sage-500" />
                         <span className="text-sm font-medium">Quest Completed!</span>
                       </div>
                     ) : (
@@ -233,20 +247,22 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
             <Card className="bg-card/90 backdrop-blur-sm border-2 border-sage-200">
               <CardHeader>
                 <CardTitle className="font-fredoka font-bold text-sage-800 flex items-center">
-                  <Trophy className="w-6 h-6 mr-2 text-gold-500" />
+                  <Trophy className="w-6 h-6 mr-2 text-gold-300" />
                   Party Leaderboard
                 </CardTitle>
-                <CardDescription>See how your quest party is performing!</CardDescription>
+                <CardDescription className="text-sage-600">See how your quest party is performing!</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {players
                     .sort((a, b) => b.xp - a.xp)
                     .map((player, index) => (
-                      <div key={player.id} className="flex items-center justify-between p-3 bg-sage-50 rounded-lg">
+                      <div key={player.id} className="flex items-center justify-between p-3 bg-cream-50 border border-sage-200 rounded-lg">
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
-                            index === 0 ? 'bg-gold-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-400'
+                            index === 0 ? 'bg-gold-300 text-neutral-800' : 
+                            index === 1 ? 'bg-sage-300 text-sage-800' : 
+                            'bg-terracotta-300 text-terracotta-800'
                           }`}>
                             {index + 1}
                           </div>
@@ -271,30 +287,30 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
             <Card className="bg-card/90 backdrop-blur-sm border-2 border-sage-200">
               <CardHeader>
                 <CardTitle className="font-fredoka font-bold text-sage-800 flex items-center">
-                  <Coins className="w-6 h-6 mr-2 text-gold-500" />
+                  <Coins className="w-6 h-6 mr-2 text-gold-300" />
                   Quest Wallet
                 </CardTitle>
-                <CardDescription>Convert your XP into real rewards!</CardDescription>
+                <CardDescription className="text-sage-600">Convert your XP into real rewards!</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="text-center p-6 bg-gradient-to-r from-gold-100 to-gold-200 rounded-xl">
-                  <div className="text-4xl font-fredoka font-bold text-gold-800 mb-2">
+                <div className="text-center p-6 bg-gradient-to-r from-gold-100 to-gold-200 rounded-xl border border-gold-300">
+                  <div className="text-4xl font-fredoka font-bold text-neutral-800 mb-2">
                     ${walletBalance}.00
                   </div>
-                  <p className="text-gold-700">Available to cash out</p>
-                  <p className="text-sm text-gold-600 mt-2">
+                  <p className="text-neutral-700">Available to cash out</p>
+                  <p className="text-sm text-neutral-600 mt-2">
                     Based on {player.xp} XP (${(player.xp / 100 * 5).toFixed(2)} earned)
                   </p>
                 </div>
                 
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center p-3 bg-sage-50 rounded-lg">
+                  <div className="flex justify-between items-center p-3 bg-sage-100 border border-sage-200 rounded-lg">
                     <span className="text-sage-700">XP Conversion Rate</span>
                     <span className="font-semibold text-sage-800">100 XP = $5.00</span>
                   </div>
-                  <div className="flex justify-between items-center p-3 bg-cream-50 rounded-lg">
-                    <span className="text-cream-700">Next Payout Level</span>
-                    <span className="font-semibold text-cream-800">
+                  <div className="flex justify-between items-center p-3 bg-pink-100 border border-pink-200 rounded-lg">
+                    <span className="text-sage-700">Next Payout Level</span>
+                    <span className="font-semibold text-sage-800">
                       {Math.ceil(player.xp / 100) * 100} XP
                     </span>
                   </div>
@@ -319,18 +335,18 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
 
         {/* Photo Upload Modal */}
         {selectedQuest && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="fixed inset-0 bg-neutral-800/50 flex items-center justify-center p-4 z-50">
             <Card className="w-full max-w-md bg-card/95 backdrop-blur-sm border-2 border-sage-200">
               <CardHeader>
                 <CardTitle className="font-fredoka font-bold text-sage-800">
                   Complete Quest: {selectedQuest.title}
                 </CardTitle>
-                <CardDescription>
+                <CardDescription className="text-sage-600">
                   Upload a photo as proof of completion to earn {selectedQuest.xp} XP!
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="border-2 border-dashed border-sage-300 rounded-lg p-8 text-center">
+                <div className="border-2 border-dashed border-sage-300 bg-sage-50/50 rounded-lg p-8 text-center">
                   <Camera className="w-12 h-12 text-sage-400 mx-auto mb-4" />
                   <p className="text-sage-600 mb-4">Take a photo of your completed quest</p>
                   <Button className="quest-button">
@@ -349,7 +365,7 @@ const QuestDashboard: React.FC<QuestDashboardProps> = ({ player, roomName, roomC
                   <Button
                     onClick={() => setSelectedQuest(null)}
                     variant="outline"
-                    className="border-sage-300"
+                    className="border-sage-300 hover:bg-sage-50"
                   >
                     Cancel
                   </Button>
