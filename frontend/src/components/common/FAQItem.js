@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import Card from "../ui/Card";
 
@@ -9,18 +10,22 @@ const FAQItem = ({
   ...props 
 }) => {
   const [isOpen, setIsOpen] = useState(defaultOpen);
+
+  const handleClick = () => {
+    setIsOpen(!isOpen);
+  };
   
   return (
     <Card variant="faq" padding="lg" className={className} {...props}>
       <button 
         className="w-full text-left flex justify-between items-center"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleClick}
       >
         <h4 className="text-xl font-bold text-[#3C6E57] pr-4">
           {question}
         </h4>
         <span className="text-[#3C6E57] text-2xl transition-transform duration-200 flex-shrink-0">
-          {isOpen ? "−" : "+"}
+          {isOpen ? "-" : "+"}
         </span>
       </button>
       
