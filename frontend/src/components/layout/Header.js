@@ -16,9 +16,15 @@ const Header = ({
   const nav = navigation.length > 0 ? navigation : defaultNavigation;
   
   return (
-    <header className={`relative z-10 bg-gradient-to-r from-[#FFF4E6] to-[#E9D8C5] ${className}`} {...props}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <header className={`z-10 bg-gradient-to-r from-[#FFF4E6] to-[#E9D8C5] ${className}`} {...props}>
+      <div className=" max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
+        
+          {/* Logo */}
+          <Link href="/" className="text-black font-bold text-xl">
+            <img src="./public/icons/QuestFlat-01.png" alt="QuestFlat Logo" className="px-8 py-3 rounded-2xl shadow-lg" />
+          </Link> 
+          
           {/* Left Navigation */}
           <nav className="flex space-x-8">
             {nav.map((item) => (
@@ -31,13 +37,6 @@ const Header = ({
               </Link>
             ))}
           </nav>
-
-          {/* Center Logo */}
-          <div className="bg-gradient-to-br from-[#9A7FF5] to-[#74A27E] px-8 py-3 rounded-2xl shadow-lg">
-            <Link href="/" className="text-white font-bold text-xl">
-              QuestFlat
-            </Link>
-          </div>
 
           {/* Right User Section */}
           <div className="flex items-center space-x-4">

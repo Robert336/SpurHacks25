@@ -173,28 +173,6 @@ export default function Dashboard() {
               </div>
             </Card>
             
-            <Card padding="lg">
-              <h3 className="text-xl font-bold text-[#3C6E57] mb-4">Component Features</h3>
-              <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium text-[#2E5744] mb-2">✨ What you're seeing:</h4>
-                  <ul className="text-sm text-[#2E5744]/80 space-y-1">
-                    <li>• Reusable Table component with custom data</li>
-                    <li>• Consistent Card components for layout</li>
-                    <li>• Badge components with different variants</li>
-                    <li>• Avatar components with fallback text</li>
-                    <li>• Button components with various styles</li>
-                    <li>• Responsive grid layouts</li>
-                  </ul>
-                </div>
-                <div className="pt-4 border-t border-[#E9D8C5]">
-                  <p className="text-sm text-[#2E5744]/80">
-                    This entire dashboard is built using the reusable component system, 
-                    demonstrating consistency and maintainability across complex layouts.
-                  </p>
-                </div>
-              </div>
-            </Card>
           </div>
         </div>
       </Section>
