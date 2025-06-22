@@ -10,8 +10,6 @@ load_dotenv(dotenv_path)
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")
 
-uid = supabase_cl.auth.get_user().user.id  # Gets the id of the user from the authorized user table
-
 
 def create_task(title: str, description: str, success_criteria: str, reward: int) -> None:
     """
@@ -22,6 +20,7 @@ def create_task(title: str, description: str, success_criteria: str, reward: int
     :param reward: the reward of the task (XP or $)
     :return: None.
     """
+    uid = supabase_cl.auth.get_user().user.id  # Gets the id of the user from the authorized user table
     gid = supabase_cl.table("group_members").select("group_id").eq("user_id", uid).execute()  # Gets the group's id
     entry = {"group_id": gid, "created_by": uid, "title": title, "description": description,
              "success_criteria": success_criteria, "reward_amount": reward}
@@ -34,6 +33,7 @@ def take_task(tid: str) -> None:
     :param tid: the id of the task the user is going to do.
     :return: None.
     """
+    uid = supabase_cl.auth.get_user().user.id  # Gets the id of the user from the authorized user table
     current_time_utc = datetime.now(timezone.utc)  # Gets the current time
 
     supabase_cl.table("tasks").update({"assigned_to": uid, "assigned_at": current_time_utc.isoformat(),
